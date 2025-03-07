@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35818.85 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternationalizationPuzzles", "InternationalizationPuzzles\InternationalizationPuzzles.csproj", "{1319CB31-164F-4964-B7B4-559EED219672}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternationalizationPuzzlesTests", "InternationalizationPuzzlesTests\InternationalizationPuzzlesTests.csproj", "{623D153A-3E5A-4164-8FBB-18BD72B3F21E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1319CB31-164F-4964-B7B4-559EED219672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1319CB31-164F-4964-B7B4-559EED219672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1319CB31-164F-4964-B7B4-559EED219672}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1319CB31-164F-4964-B7B4-559EED219672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{623D153A-3E5A-4164-8FBB-18BD72B3F21E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{623D153A-3E5A-4164-8FBB-18BD72B3F21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{623D153A-3E5A-4164-8FBB-18BD72B3F21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{623D153A-3E5A-4164-8FBB-18BD72B3F21E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B67D83C0-E582-4F17-ABE7-4554A5402075}
+	EndGlobalSection
+EndGlobal
