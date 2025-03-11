@@ -26,13 +26,14 @@ if (File.Exists(input))
     input = File.ReadAllText(input);
 }
 Func<string, IPuzzle>[] puzzles =
-{
+[
     x => new Puzzle01(x),
     x => new Puzzle02(x),
     x => new Puzzle03(x),
     x => new Puzzle04(x),
+    x => new Puzzle05(x),
     // Add puzzles here
-};
+];
 if (!int.TryParse(day, out int dayValue) || dayValue < 1 || dayValue > puzzles.Length)
 {
     throw new Exception($"Bad day: {day}");

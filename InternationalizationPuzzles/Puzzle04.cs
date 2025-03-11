@@ -7,10 +7,9 @@ namespace InternationalizationPuzzles;
 public class Puzzle04(string input) : IPuzzle
 {
     public string Solve()
-    {        
+    {
         var normalized = input.TrimEnd().ReplaceLineEndings("\n");
         var paragraphs = normalized.Split("\n\n");
-
         int tripTime = 0;
         foreach (var trip in paragraphs)
         {
@@ -26,7 +25,7 @@ public class Puzzle04(string input) : IPuzzle
                 var utcTime = TimeZoneInfo.ConvertTimeToUtc(localTime, timezone);
                 if (match.Groups[1].Value == "Departure")
                 {
-                    start= utcTime;
+                    start = utcTime;
                 }
                 else if (match.Groups[1].Value == "Arrival")
                 {
