@@ -1,4 +1,6 @@
-﻿namespace InternationalizationPuzzles;
+﻿using System.Collections.Concurrent;
+
+namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/10/
 // Puzzle 10: Unicode passwords strike back!
@@ -6,7 +8,7 @@ public class Puzzle10 : IPuzzle
 {
     private readonly Dictionary<string, string> authEntries;
     private readonly (string Name, string Pass)[] loginAttempts;
-    private readonly Dictionary<string, string> confirmedPasswords;
+    private readonly ConcurrentDictionary<string, string> confirmedPasswords;
 
     public Puzzle10(string input)
     {
@@ -24,13 +26,13 @@ public class Puzzle10 : IPuzzle
     public string Solve()
     {
         int validAttempts = 0;
-        foreach (var (name, pass) in loginAttempts)
+        Parallel.ForEach(loginAttempts, attempt =>
         {
-            if (CheckPassword(name, pass))
+            if (CheckPassword(attempt.Name, attempt.Pass))
             {
-                validAttempts++;
+                Interlocked.Increment(ref validAttempts);
             }
-        }
+        });
         return validAttempts.ToString();
     }
 
