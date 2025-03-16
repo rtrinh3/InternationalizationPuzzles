@@ -2,33 +2,56 @@
 
 // https://i18n-puzzles.com/puzzle/10/
 // Puzzle 10: Unicode passwords strike back!
-public class Puzzle10(string input) : IPuzzle
+public class Puzzle10 : IPuzzle
 {
-    public string Solve()
+    private readonly Dictionary<string, string> authEntries;
+    private readonly (string Name, string Pass)[] loginAttempts;
+    private readonly Dictionary<string, string> confirmedPasswords;
+
+    public Puzzle10(string input)
     {
-        // Parse
         var paragraphs = input.TrimEnd().ReplaceLineEndings("\n").Split("\n\n");
-        Dictionary<string, string> authEntries = paragraphs[0].Split('\n')
+        authEntries = paragraphs[0].Split('\n')
             .Select(line => line.Split(' ', 2))
             .ToDictionary(x => x[0], x => x[1]);
+        loginAttempts = paragraphs[1].Split('\n')
+            .Select(line => line.Split(' ', 2))
+            .Select(x => (x[0], x[1]))
+            .ToArray();
+        confirmedPasswords = new();
+    }
+
+    public string Solve()
+    {
         int validAttempts = 0;
-        foreach (var line in paragraphs[1].Split('\n'))
+        foreach (var (name, pass) in loginAttempts)
         {
-            var parts = line.Split(' ', 2);
-            string name = parts[0];
-            string pass = parts[1];
-            string normalizedPass = pass.Normalize(System.Text.NormalizationForm.FormC); // Composition
-            var variations = GenerateDenormalizedStrings(normalizedPass);
-            foreach (string variation in variations)
+            if (CheckPassword(name, pass))
             {
-                if (BCrypt.Net.BCrypt.Verify(variation, authEntries[name]))
-                {
-                    validAttempts++;
-                    break;
-                }
+                validAttempts++;
             }
         }
         return validAttempts.ToString();
+    }
+
+    private bool CheckPassword(string name, string pass)
+    {
+        string normalizedPass = pass.Normalize(System.Text.NormalizationForm.FormC); // Composition
+        if (confirmedPasswords.TryGetValue(name, out var confirmedPass))
+        {
+            return confirmedPass == normalizedPass;
+        }
+        var variations = GenerateDenormalizedStrings(normalizedPass);
+        var wanted = authEntries[name];
+        foreach (string variation in variations)
+        {
+            if (BCrypt.Net.BCrypt.Verify(variation, wanted))
+            {
+                confirmedPasswords[name] = normalizedPass;
+                return true;
+            }
+        }
+        return false;
     }
 
     private static IEnumerable<string> GenerateDenormalizedStrings(string normalInput)
