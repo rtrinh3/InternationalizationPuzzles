@@ -3,7 +3,7 @@
 namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/4/
-// A trip around the world
+// Puzzle 4: A trip around the world
 public class Puzzle04(string input) : IPuzzle
 {
     public string Solve()

@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/6/
-// Day 6: Mojibake puzzle dictionary
+// Puzzle 6: Mojibake puzzle dictionary
 [TestClass()]
 public class Puzzle06Tests
 {

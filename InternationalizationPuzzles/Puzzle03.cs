@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/3/
-// Unicode passwords
+// Puzzle 3: Unicode passwords
 public class Puzzle03(string input) : IPuzzle
 {
     public string Solve()

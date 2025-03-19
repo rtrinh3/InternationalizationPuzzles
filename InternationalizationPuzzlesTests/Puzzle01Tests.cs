@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/1/
-// Length limits on messaging platforms
+// Puzzle 1: Length limits on messaging platforms
 [TestClass()]
 public class Puzzle01Tests
 {

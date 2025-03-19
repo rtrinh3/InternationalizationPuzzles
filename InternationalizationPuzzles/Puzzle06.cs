@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/6/
-// Day 6: Mojibake puzzle dictionary
+// Puzzle 6: Mojibake puzzle dictionary
 public class Puzzle06(string input) : IPuzzle
 {
     public string Solve()

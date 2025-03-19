@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/2/
-// Detecting gravitational waves
+// Puzzle 2: Detecting gravitational waves
 public class Puzzle02(string input) : IPuzzle
 {
     public string Solve()

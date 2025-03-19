@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/1/
-// Length limits on messaging platforms
+// Puzzle 1: Length limits on messaging platforms
 public class Puzzle01(string input) : IPuzzle
 {
     public string Solve()

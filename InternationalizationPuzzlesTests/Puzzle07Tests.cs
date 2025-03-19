@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/7/
-// Day 7: The audit trail fixer
+// Puzzle 7: The audit trail fixer
 [TestClass()]
 public class Puzzle07Tests
 {

@@ -3,7 +3,7 @@
 namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/5/
-// Day 5: Don't step in it...
+// Puzzle 5: Don't step in it...
 public class Puzzle05(string input) : IPuzzle
 {
     public string Solve()

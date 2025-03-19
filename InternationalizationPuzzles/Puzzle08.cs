@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/8/
-// Day 8: Unicode passwords redux
+// Puzzle 8: Unicode passwords redux
 public class Puzzle08(string input) : IPuzzle
 {
     public string Solve()

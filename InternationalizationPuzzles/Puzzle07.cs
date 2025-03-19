@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/7/
-// Day 7: The audit trail fixer
+// Puzzle 7: The audit trail fixer
 public class Puzzle07(string input) : IPuzzle
 {
     public string Solve()

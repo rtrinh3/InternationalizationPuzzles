@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/5/
-// Day 5: Don't step in it...
+// Puzzle 5: Don't step in it...
 [TestClass()]
 public class Puzzle05Tests
 {

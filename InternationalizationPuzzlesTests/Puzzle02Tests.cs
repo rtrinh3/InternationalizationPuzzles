@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/2/
-// Detecting gravitational waves
+// Puzzle 2: Detecting gravitational waves
 [TestClass()]
 public class Puzzle02Tests
 {

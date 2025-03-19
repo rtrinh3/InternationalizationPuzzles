@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/8/
-// Day 8: Unicode passwords redux
+// Puzzle 8: Unicode passwords redux
 [TestClass()]
 public class Puzzle08Tests
 {
