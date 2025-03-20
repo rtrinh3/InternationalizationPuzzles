@@ -20,7 +20,7 @@ public class Puzzle14(string input) : IPuzzle
         return answer.ToString();
     }
 
-    private decimal ParseMeasurement(string measurement)
+    private static decimal ParseMeasurement(string measurement)
     {
         var unit = measurement[^1];
         decimal multiplier = unit switch
@@ -41,7 +41,7 @@ public class Puzzle14(string input) : IPuzzle
         return result;
     }
 
-    private decimal ParseNumber(string number)
+    public static decimal ParseNumber(string number)
     {
         decimal result = 0;
         decimal accumulator = 0;
