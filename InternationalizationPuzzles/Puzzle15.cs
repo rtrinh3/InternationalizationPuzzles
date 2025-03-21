@@ -8,9 +8,9 @@ public class Puzzle15(string input) : IPuzzle
     {
         // https://en.wikipedia.org/wiki/Time_in_Norway
         var norwayTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Oslo");
-        var norwayRule = norwayTimeZone.GetAdjustmentRules().Single(rule => rule.DateStart.Year <= 2022 && rule.DateEnd.Year >= 2022);
-        var trollRule = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(norwayRule.DateStart, norwayRule.DateEnd, TimeSpan.FromHours(+2), norwayRule.DaylightTransitionStart, norwayRule.DaylightTransitionEnd, norwayRule.BaseUtcOffsetDelta);
-        var trollTimeZone = TimeZoneInfo.CreateCustomTimeZone("Antarctica/Troll", TimeSpan.FromHours(+2), "Antarctica/Troll", "Antarctica/Troll Standard", "Antarctica/Troll Daylight", [trollRule]);
+        var norwayRules = norwayTimeZone.GetAdjustmentRules();
+        var trollRules = norwayRules.Select(rule => TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(rule.DateStart, rule.DateEnd, TimeSpan.FromHours(+2), rule.DaylightTransitionStart, rule.DaylightTransitionEnd, rule.BaseUtcOffsetDelta)).ToArray();
+        var trollTimeZone = TimeZoneInfo.CreateCustomTimeZone("Antarctica/Troll", TimeSpan.Zero, "Antarctica/Troll", "Antarctica/Troll Standard", "Antarctica/Troll Daylight", trollRules);
         return trollTimeZone;
     }
 
