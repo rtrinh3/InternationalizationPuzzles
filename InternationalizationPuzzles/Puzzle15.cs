@@ -42,36 +42,61 @@ public class Puzzle15(string input) : IPuzzle
         Office[] supportOffices = paragraphs[0].Split('\n').Select(ParseOffice).ToArray();
         Office[] clients = paragraphs[1].Split('\n').Select(ParseOffice).ToArray();
 
-        DateTime yearStart = new(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        DateTime yearEnd = new(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        // Simulate
+        DateTime yearStart = new(2022, 1, 1, 0, 0, 0);
+        DateTime yearEve = yearStart.AddDays(-1);
+        DateTime yearEnd = new(2023, 1, 1, 0, 0, 0);
         TimeOnly officeStart = new(8, 30);
         TimeOnly officeEnd = new(17, 0);
-        int[] overTimeMinutesPerClient = clients.AsParallel().Select(client =>
+        int[] overTimeMinutesPerClient = clients.Select(client =>
         {
             int overTimeMinutes = 0;
-            for (DateTime dt = yearStart; dt < yearEnd; dt = dt.AddMinutes(1))
+            bool simulationActive = false;
+            bool clientWorkingDay = false;
+            int openSupportOffices = 0;
+            List<(DateTime dateTime, Action action)> queue = new();
+            // Simulation bounds
+            queue.Add((yearStart, () => simulationActive = true));
+            queue.Add((yearEnd, () => simulationActive = false));
+            // Client days
+            for (DateTime localDateTime = yearEve; localDateTime < yearEnd; localDateTime = localDateTime.AddDays(1))
+            {                
+                bool isBusinessDay = !(localDateTime.DayOfWeek == DayOfWeek.Saturday || localDateTime.DayOfWeek == DayOfWeek.Sunday || client.Holidays.Contains(DateOnly.FromDateTime(localDateTime)));
+                DateTime midnight = localDateTime.Date;
+                while (client.TimeZone.IsInvalidTime(midnight))
+                {
+                    midnight = midnight.AddMinutes(1);
+                }
+                DateTime midnightInUtc = TimeZoneInfo.ConvertTimeToUtc(midnight, client.TimeZone);
+                queue.Add((midnightInUtc, () => clientWorkingDay = isBusinessDay));
+            }
+            // Support office days
+            foreach (var office in supportOffices)
             {
-                var clientDate = TimeZoneInfo.ConvertTime(dt, TimeZoneInfo.Utc, client.TimeZone);
-                if (clientDate.DayOfWeek == DayOfWeek.Saturday || clientDate.DayOfWeek == DayOfWeek.Sunday || client.Holidays.Contains(DateOnly.FromDateTime(clientDate)))
+                for (DateTime localDate = yearEve; localDate < yearEnd; localDate = localDate.AddDays(1))
                 {
-                    continue;
-                }
-                foreach (var supportOffice in supportOffices)
-                {
-                    DateTime supportDate = TimeZoneInfo.ConvertTime(dt, TimeZoneInfo.Utc, supportOffice.TimeZone);
-                    if (supportDate.DayOfWeek == DayOfWeek.Saturday || supportDate.DayOfWeek == DayOfWeek.Sunday || supportOffice.Holidays.Contains(DateOnly.FromDateTime(supportDate)))
+                    bool isBusinessDay = !(localDate.DayOfWeek == DayOfWeek.Saturday || localDate.DayOfWeek == DayOfWeek.Sunday || office.Holidays.Contains(DateOnly.FromDateTime(localDate)));
+                    if (isBusinessDay)
                     {
-                        continue;
-                    }
-                    var supportTime = TimeOnly.FromDateTime(supportDate);
-                    if (supportTime.IsBetween(officeStart, officeEnd))
-                    {
-                        goto FOUND_OFFICE;
+                        var openingLocalDateTime = localDate.Add(officeStart.ToTimeSpan());
+                        var openingUtcDateTime = TimeZoneInfo.ConvertTimeToUtc(openingLocalDateTime, office.TimeZone);
+                        queue.Add((openingUtcDateTime, () => openSupportOffices++));
+                        var closingLocalDateTime = localDate.Add(officeEnd.ToTimeSpan());
+                        var closingUtcDateTime = TimeZoneInfo.ConvertTimeToUtc(closingLocalDateTime, office.TimeZone);
+                        queue.Add((closingUtcDateTime, () => openSupportOffices--));
                     }
                 }
-                overTimeMinutes++;
-            FOUND_OFFICE:
-                ;
+            }
+            // Process queue
+            queue.Sort((a, b) => a.dateTime.CompareTo(b.dateTime));
+            for (int i = 0; i < queue.Count; i++)
+            {
+                queue[i].action();
+                if (simulationActive && clientWorkingDay && openSupportOffices <= 0)
+                {
+                    int minutes = (int)(queue[i + 1].dateTime - queue[i].dateTime).TotalMinutes;
+                    overTimeMinutes += minutes;
+                }
             }
             return overTimeMinutes;
         }).ToArray();
