@@ -1,5 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
+// https://i18n-puzzles.com/puzzle/15/
+// Puzzle 15: 24/5 support
 [TestClass()]
 public class Puzzle15Tests
 {
