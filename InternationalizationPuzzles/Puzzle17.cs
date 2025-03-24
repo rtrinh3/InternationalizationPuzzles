@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Text;
 namespace InternationalizationPuzzles;
 
 // https://i18n-puzzles.com/puzzle/17/
-// Puzzle 17
+// Puzzle 17: ╳ marks the spot
 public class Puzzle17 : IPuzzle
 {
     private record ChunkRow(byte[] Bytes, int StartsWithContinuationBytes, int MissingContinuationBytes)
@@ -33,7 +32,7 @@ public class Puzzle17 : IPuzzle
         }
     }
 
-    private readonly record struct Coord(int Row, int Col);
+    private record Coord(int Row, int Col);
 
     private readonly ChunkRow[][] mapChunks; // mapChunks[chunk][row].Bytes[column]
     private bool solved = false;
@@ -69,18 +68,24 @@ public class Puzzle17 : IPuzzle
 
     public string Solve()
     {
-        var timerTask = Task.Run(TimerCallback);
-        var drawTask = Task.Run(DrawCallback);
+        //var timerTask = Task.Run(TimerCallback);
+        //var drawTask = Task.Run(DrawCallback);
 
         int totalRows = mapChunks.Sum(chunk => chunk.Length);
         Console.WriteLine($"Chunks: {mapChunks.Length}, Total rows: {totalRows}");
         var distinctLengths = mapChunks.SelectMany(chunk => chunk.Select(row => row.Bytes.Length)).Distinct().ToArray();
         Debug.Assert(distinctLengths.Length == 1);
         int chunkRowLength = distinctLengths[0];
+
         byte[] topLeftCornerBytes = Encoding.UTF8.GetBytes("╔");
-        var topLeftCornerChunk = mapChunks.Single(chunk => chunk[0].Bytes.Take(3).SequenceEqual(topLeftCornerBytes));
+        var topLeftCornerChunk = mapChunks.Single(chunk => chunk[0].Bytes.Take(topLeftCornerBytes.Length).SequenceEqual(topLeftCornerBytes));
         byte[] bottomLeftCornerBytes = Encoding.UTF8.GetBytes("╚");
-        var bottomLeftCornerChunk = mapChunks.Single(chunk => chunk[^1].Bytes.Take(3).SequenceEqual(bottomLeftCornerBytes));
+        var bottomLeftCornerChunk = mapChunks.Single(chunk => chunk[^1].Bytes.Take(bottomLeftCornerBytes.Length).SequenceEqual(bottomLeftCornerBytes));
+        byte[] topRightCornerBytes = Encoding.UTF8.GetBytes("╗");
+        var topRightCornerChunk = mapChunks.Single(chunk => chunk[0].Bytes.TakeLast(topRightCornerBytes.Length).SequenceEqual(topRightCornerBytes));
+        byte[] bottomRightCornerBytes = Encoding.UTF8.GetBytes("╝");
+        var bottomRightCornerChunk = mapChunks.Single(chunk => chunk[^1].Bytes.TakeLast(bottomRightCornerBytes.Length).SequenceEqual(bottomRightCornerBytes));
+
         var leftChunks = mapChunks.Where(chunk => chunk.All(row => row.StartsWithContinuationBytes == 0)).ToArray();
         Debug.Assert(leftChunks.Contains(topLeftCornerChunk) && leftChunks.Contains(bottomLeftCornerChunk));
         int leftRows = leftChunks.Sum(chunk => chunk.Length);
@@ -99,7 +104,7 @@ public class Puzzle17 : IPuzzle
                 drawQueue.Add(currentMap);
             }
             int maxCol = currentMap.Keys.Max(coord => coord.Col);
-            if (maxCol > columns)
+            if (maxCol >= columns)
             {
                 return null;
             }
@@ -120,99 +125,114 @@ public class Puzzle17 : IPuzzle
                 }
                 return currentMap;
             }
-            var maxRowByCol = currentMap.Keys.GroupBy(x => x.Col).ToDictionary(g => g.Key, g => g.Max(x => x.Row) + 1);
-            var highestRow = maxRowByCol.Values.Max();
-            if (highestRow > rows)
+            //var maxRowByCol = currentMap.Keys.GroupBy(x => x.Col).ToDictionary(g => g.Key, g => g.Max(x => x.Row) + 1);
+            var highestRow = currentMap.Keys.Max(coord => coord.Row);
+            if (highestRow >= rows)
             {
                 return null;
             }
+            Coord? blankCoord = null;
+            for (int mapRow = 0; mapRow < rows && blankCoord is null; mapRow++)
+            {
+                for (int col = 0; col < columns && blankCoord is null; col++)
+                {
+                    if (!currentMap.ContainsKey(new(mapRow, col)))
+                    {
+                        blankCoord = new(mapRow, col);
+                    }
+                }
+            }
+            Debug.Assert(blankCoord is not null);
             foreach (int chunkIndex in availableChumks)
             {
-                if (solved)
-                {
-                    return null;
-                }
                 var chunk = mapChunks[chunkIndex];
                 var newAvailableChunks = availableChumks.Remove(chunkIndex);
-                for (int col = Math.Min(columns, maxCol + 1); col >= 0; col--)
+                if (blankCoord.Col == columns - 1 && !rightChunks.Contains(chunk))
                 {
-                    int maxRow = maxRowByCol.GetValueOrDefault(col);
-                    if (!(col == 0 || currentMap.ContainsKey(new(maxRow, col - 1)) || currentMap.ContainsKey(new(maxRow, col + 1))))
-                    {
-                        continue;
-                    }
-                    if (col == columns && !rightChunks.Contains(chunk))
-                    {
-                        continue;
-                    }
-                    Dictionary<Coord, ChunkRow> newMap = new(currentMap);
-                    for (int row = 0; row < chunk.Length; row++)
-                    {
-                        var coord = new Coord(maxRow + row, col);
-                        if (currentMap.ContainsKey(coord))
-                        {
-                            goto CONTINUE_COL_LOOP;
-                        }
-                        if (chunk[row].StartsWithContinuationBytes > 0)
-                        {
-                            if (col == 0)
-                            {
-                                goto CONTINUE_COL_LOOP;
-                            }
-                            var leftCoord = new Coord(coord.Row, coord.Col - 1);
-                            if (currentMap.TryGetValue(leftCoord, out var leftChunk) && leftChunk.MissingContinuationBytes != chunk[row].StartsWithContinuationBytes)
-                            {
-                                goto CONTINUE_COL_LOOP;
-                            }
-                        }
-                        if (chunk[row].MissingContinuationBytes > 0)
-                        {
-                            var rightCoord = new Coord(coord.Row, coord.Col + 1);
-                            if (currentMap.TryGetValue(rightCoord, out var rightChunk) && rightChunk.StartsWithContinuationBytes != chunk[row].MissingContinuationBytes)
-                            {
-                                goto CONTINUE_COL_LOOP;
-                            }
-                        }
-                        newMap.Add(coord, chunk[row]);
-                    }
-                    var result = BuildMap(newMap, newAvailableChunks);
-                    if (result is not null)
-                    {
-                        return result;
-                    }
-                CONTINUE_COL_LOOP:
-                    ;
+                    continue;
                 }
+                Dictionary<Coord, ChunkRow> newMap = new(currentMap);
+                for (int row = 0; row < chunk.Length; row++)
+                {
+                    var coord = new Coord(blankCoord.Row + row, blankCoord.Col);
+                    if (currentMap.ContainsKey(coord))
+                    {
+                        goto NEXT_CHUNK_CANDIDATE;
+                    }
+                    if (chunk[row].StartsWithContinuationBytes > 0)
+                    {
+                        if (coord.Col == 0)
+                        {
+                            goto NEXT_CHUNK_CANDIDATE;
+                        }
+                        var leftCoord = new Coord(coord.Row, coord.Col - 1);
+                        if (currentMap.TryGetValue(leftCoord, out var leftChunk) && leftChunk.MissingContinuationBytes != chunk[row].StartsWithContinuationBytes)
+                        {
+                            goto NEXT_CHUNK_CANDIDATE;
+                        }
+                    }
+                    if (chunk[row].MissingContinuationBytes > 0)
+                    {
+                        var rightCoord = new Coord(coord.Row, coord.Col + 1);
+                        if (currentMap.TryGetValue(rightCoord, out var rightChunk) && rightChunk.StartsWithContinuationBytes != chunk[row].MissingContinuationBytes)
+                        {
+                            goto NEXT_CHUNK_CANDIDATE;
+                        }
+                    }
+                    newMap.Add(coord, chunk[row]);
+                }
+                var result = BuildMap(newMap, newAvailableChunks);
+                if (result is not null)
+                {
+                    return result;
+                }
+            NEXT_CHUNK_CANDIDATE:
+                ;
             }
+            //for (int col = 0; col <= Math.Min(columns - 1, maxCol + 1); col++)
+            //{
+            //    int blankRowInCol = 0;
+            //    while (currentMap.ContainsKey(new(blankRowInCol, col)))
+            //    {
+            //        blankRowInCol++;
+            //    }
+            //    if (!(/*col == 0 ||*/ currentMap.ContainsKey(new(blankRowInCol, col - 1)) || currentMap.ContainsKey(new(blankRowInCol, col + 1))))
+            //    {
+            //        continue;
+            //    }
+            //    if (blankRowInCol == 0)
+            //    {
+            //        break;
+            //    }
+            //}
             return null;
         }
+        ChunkRow[][] corners = [topLeftCornerChunk, topRightCornerChunk, bottomLeftCornerChunk, bottomRightCornerChunk];
         var initialAvailableChunks = Enumerable.Range(0, mapChunks.Length)
-            .Where(i => !leftChunks.Contains(mapChunks[i]))
-            .ToImmutableHashSet();        
-        Dictionary<Coord, ChunkRow>? finalResult = null;
-        var leftMiddleChunks = leftChunks.ToHashSet();
-        leftMiddleChunks.Remove(topLeftCornerChunk);
-        leftMiddleChunks.Remove(bottomLeftCornerChunk);
-        int permutationCount = 0;
-        var allPermutations = PermutationsOf(leftMiddleChunks).ToArray();
-        Parallel.ForEach(allPermutations, (permutation, loopState) =>
+            //.Where(i => !leftChunks.Contains(mapChunks[i]))
+            .Where(i => !corners.Contains(mapChunks[i]))
+            .ToImmutableHashSet();
+        //var leftMiddleChunks = leftChunks.ToHashSet();
+        //leftMiddleChunks.Remove(topLeftCornerChunk);
+        //leftMiddleChunks.Remove(bottomLeftCornerChunk);
+        Dictionary<Coord, ChunkRow> initialMap = new();
+        for (int row = 0; row < topLeftCornerChunk.Length; row++)
         {
-            //Console.WriteLine($"Permutation {permutationCount++}");
-            Dictionary<Coord, ChunkRow> initialMap = new();
-            ChunkRow[][] chunks = [topLeftCornerChunk, .. permutation, bottomLeftCornerChunk];
-            ChunkRow[] initialRows = chunks.SelectMany(c => c).ToArray();
-            for (int row = 0; row < initialRows.Length; row++)
-            {
-                initialMap.Add(new Coord(row, 0), initialRows[row]);
-            }
-            var result = BuildMap(initialMap, initialAvailableChunks);
-            if (result is not null)
-            {
-                finalResult = result;
-                //break;
-                loopState.Stop();
-            }
-        });
+            initialMap.Add(new Coord(row, 0), topLeftCornerChunk[row]);
+        }
+        for (int row = 0; row < topRightCornerChunk.Length; row++)
+        {
+            initialMap.Add(new Coord(row, columns - 1), topRightCornerChunk[row]);
+        }
+        for (int row = 0; row < bottomLeftCornerChunk.Length; row++)
+        {
+            initialMap.Add(new Coord(rows - bottomLeftCornerChunk.Length + row, 0), bottomLeftCornerChunk[row]);
+        }
+        for (int row = 0; row < bottomRightCornerChunk.Length; row++)
+        {
+            initialMap.Add(new Coord(rows - bottomRightCornerChunk.Length + row, columns - 1), bottomRightCornerChunk[row]);
+        }
+        var finalResult = BuildMap(initialMap, initialAvailableChunks);
         solved = true;
         drawQueue.Add(null);
         Debug.Assert(finalResult is not null);
@@ -276,8 +296,8 @@ public class Puzzle17 : IPuzzle
             }
             int mapRows = item.Keys.Max(coord => coord.Row);
             int mapCols = item.Keys.Max(coord => coord.Col);
-            var resultString = new string[Math.Min(mapRows + 1, 48)];
-            for (int row = 0; row < resultString.Length; row++)
+            var resultString = new List<string>();
+            for (int row = 0; row <= mapRows; row += 2)
             {
                 StringBuilder sb = new();
                 for (int column = 0; column <= mapCols; column++)
@@ -285,14 +305,13 @@ public class Puzzle17 : IPuzzle
                     if (item.TryGetValue(new Coord(row, column), out var chunkRow))
                     {
                         sb.AppendFormat("{0:x2}", chunkRow.Bytes[0]);
-                        sb.AppendFormat("{0:x2}", chunkRow.Bytes[1]);
                     }
                     else
                     {
-                        sb.Append("    ");
+                        sb.Append("  ");
                     }
                 }
-                resultString[row] = sb.ToString();
+                resultString.Add(sb.ToString());
             }
             var result = string.Join("\n", resultString);
             Console.WriteLine(result);

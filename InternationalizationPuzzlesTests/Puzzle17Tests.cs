@@ -1,7 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/17/
-// Puzzle 17
+// Puzzle 17: ╳ marks the spot
 [TestClass()]
 public class Puzzle17Tests
 {
@@ -18,7 +18,6 @@ public class Puzzle17Tests
     {
         var solver = new Puzzle17(File.ReadAllText("17-input.txt"));
         var answer = solver.Solve();
-        //Assert.AreEqual("", answer);
-        Assert.Inconclusive(answer);
+        Assert.AreEqual("7912", answer);
     }
 }
