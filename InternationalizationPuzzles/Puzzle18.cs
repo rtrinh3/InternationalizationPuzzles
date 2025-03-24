@@ -33,36 +33,27 @@ public class Puzzle18(string input) : IPuzzle
         var tokens = Regex.Matches(line, @"\+|\-|\*|\/|\(|\)|\d+|\u2067|\u2066|\u2069");
         Stack<LinkedListNode<string>> insertionStack = new();
         insertionStack.Push(firstNode);
+        bool IsLtr() => insertionStack.Count % 2 != 0;
         foreach (Match token in tokens)
         {
             if (token.Value == "\u2067")
             {
-                var cursor = insertionStack.Pop();
                 // If currently LTR, switch to RTL
-                if (insertionStack.Count % 2 == 0)
+                if (IsLtr())
                 {
-                    var newCursor = buffer.AddAfter(cursor, "");
+                    var cursor = insertionStack.Peek();
+                    var newCursor = buffer.AddBefore(cursor, "");
                     insertionStack.Push(newCursor);
-                    insertionStack.Push(newCursor);
-                }
-                else
-                {
-                    insertionStack.Push(cursor);
                 }
             }
             else if (token.Value == "\u2066")
             {
-                var cursor = insertionStack.Pop();
                 // If currently RTL, switch to LTR
-                if (insertionStack.Count % 2 == 1)
+                if (!IsLtr())
                 {
-                    var newCursor = buffer.AddBefore(cursor, "");
+                    var cursor = insertionStack.Peek();
+                    var newCursor = buffer.AddAfter(cursor, "");
                     insertionStack.Push(newCursor);
-                    insertionStack.Push(newCursor);
-                }
-                else
-                {
-                    insertionStack.Push(cursor);
                 }
             }
             else if (token.Value == "\u2069")
@@ -71,27 +62,39 @@ public class Puzzle18(string input) : IPuzzle
             }
             else if (token.Value == "(")
             {
-                var cursor = insertionStack.Pop();
-                var newCursor = (insertionStack.Count % 2 == 0)
-                    ? buffer.AddAfter(cursor, "(")
-                    : buffer.AddBefore(cursor, ")");
-                insertionStack.Push(newCursor);
+                var cursor = insertionStack.Peek();
+                if (IsLtr())
+                {
+                    buffer.AddBefore(cursor, "(");
+                }
+                else
+                {
+                    buffer.AddAfter(cursor, ")");
+                }
             }
             else if (token.Value == ")")
             {
-                var cursor = insertionStack.Pop();
-                var newCursor = (insertionStack.Count % 2 == 0)
-                    ? buffer.AddAfter(cursor, ")")
-                    : buffer.AddBefore(cursor, "(");
-                insertionStack.Push(newCursor);
+                var cursor = insertionStack.Peek();
+                if (IsLtr())
+                {
+                    buffer.AddBefore(cursor, ")");
+                }
+                else
+                {
+                    buffer.AddAfter(cursor, "(");
+                }
             }
             else
             {
-                var cursor = insertionStack.Pop();
-                var newCursor = (insertionStack.Count % 2 == 0)
-                    ? buffer.AddAfter(cursor, token.Value)
-                    : buffer.AddBefore(cursor, token.Value);
-                insertionStack.Push(newCursor);
+                var cursor = insertionStack.Peek();
+                if (IsLtr())
+                {
+                    buffer.AddBefore(cursor, token.Value);
+                }
+                else
+                {
+                    buffer.AddAfter(cursor, token.Value);
+                }
             }
         }
 
