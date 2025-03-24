@@ -9,9 +9,9 @@ namespace InternationalizationPuzzles;
 // Puzzle 17: ╳ marks the spot
 public class Puzzle17 : IPuzzle
 {
-    private record ChunkRow(byte[] Bytes, int StartsWithContinuationBytes, int MissingContinuationBytes)
+    private record ChunkRow(byte[] Bytes, int ChunkIndex, int StartsWithContinuationBytes, int MissingContinuationBytes)
     {
-        public static ChunkRow FromBytes(byte[] bytes)
+        public static ChunkRow FromBytes(byte[] bytes, int chunkIndex)
         {
             int startsWithContinuationBytes = bytes.TakeWhile(IsUtf8ContinuationByte).Count();
             int missingContinuationBytes = 0;
@@ -28,7 +28,7 @@ public class Puzzle17 : IPuzzle
                     break;
                 }
             }
-            return new ChunkRow(bytes, startsWithContinuationBytes, missingContinuationBytes);
+            return new ChunkRow(bytes, chunkIndex, startsWithContinuationBytes, missingContinuationBytes);
         }
     }
 
@@ -43,12 +43,12 @@ public class Puzzle17 : IPuzzle
     {
         string[] paragraphs = input.TrimEnd().ReplaceLineEndings("\n").Split("\n\n");
         mapChunks = paragraphs.Select(line => line.Split("\n"))
-        .Select(lines =>
+        .Select((lines, index) =>
         {
             return lines.Select(line =>
             {
                 var bytes = Convert.FromHexString(line);
-                return ChunkRow.FromBytes(bytes);
+                return ChunkRow.FromBytes(bytes, index);
             })
             .ToArray();
         })
@@ -96,7 +96,6 @@ public class Puzzle17 : IPuzzle
         Debug.Assert(totalRows % rows == 0);
         int columns = totalRows / rows;
 
-        // data structure: map[(row,column)] = chunk
         Dictionary<Coord, ChunkRow>? BuildMap(Dictionary<Coord, ChunkRow> currentMap, ImmutableHashSet<int> availableChumks)
         {
             if (timerQueue.TryDequeue(out _))
@@ -110,7 +109,6 @@ public class Puzzle17 : IPuzzle
             }
             if (availableChumks.Count == 0)
             {
-                //Console.WriteLine("All chunks used");
                 // Check no unterminated code points
                 foreach (var kvp in currentMap)
                 {
@@ -125,7 +123,6 @@ public class Puzzle17 : IPuzzle
                 }
                 return currentMap;
             }
-            //var maxRowByCol = currentMap.Keys.GroupBy(x => x.Col).ToDictionary(g => g.Key, g => g.Max(x => x.Row) + 1);
             var highestRow = currentMap.Keys.Max(coord => coord.Row);
             if (highestRow >= rows)
             {
@@ -189,32 +186,12 @@ public class Puzzle17 : IPuzzle
             NEXT_CHUNK_CANDIDATE:
                 ;
             }
-            //for (int col = 0; col <= Math.Min(columns - 1, maxCol + 1); col++)
-            //{
-            //    int blankRowInCol = 0;
-            //    while (currentMap.ContainsKey(new(blankRowInCol, col)))
-            //    {
-            //        blankRowInCol++;
-            //    }
-            //    if (!(/*col == 0 ||*/ currentMap.ContainsKey(new(blankRowInCol, col - 1)) || currentMap.ContainsKey(new(blankRowInCol, col + 1))))
-            //    {
-            //        continue;
-            //    }
-            //    if (blankRowInCol == 0)
-            //    {
-            //        break;
-            //    }
-            //}
             return null;
         }
         ChunkRow[][] corners = [topLeftCornerChunk, topRightCornerChunk, bottomLeftCornerChunk, bottomRightCornerChunk];
         var initialAvailableChunks = Enumerable.Range(0, mapChunks.Length)
-            //.Where(i => !leftChunks.Contains(mapChunks[i]))
             .Where(i => !corners.Contains(mapChunks[i]))
             .ToImmutableHashSet();
-        //var leftMiddleChunks = leftChunks.ToHashSet();
-        //leftMiddleChunks.Remove(topLeftCornerChunk);
-        //leftMiddleChunks.Remove(bottomLeftCornerChunk);
         Dictionary<Coord, ChunkRow> initialMap = new();
         for (int row = 0; row < topLeftCornerChunk.Length; row++)
         {
@@ -279,7 +256,7 @@ public class Puzzle17 : IPuzzle
         var timer = Stopwatch.StartNew();
         while (!solved)
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(250);
             Console.WriteLine($"Time: {timer.Elapsed}");
             timerQueue.Enqueue(true);
         }
@@ -287,6 +264,8 @@ public class Puzzle17 : IPuzzle
 
     private void DrawCallback()
     {
+        string sample = (mapChunks.Length - 1).ToString();
+        int sampleLength = sample.Length;
         while (!solved)
         {
             var item = drawQueue.Take();
@@ -304,11 +283,12 @@ public class Puzzle17 : IPuzzle
                 {
                     if (item.TryGetValue(new Coord(row, column), out var chunkRow))
                     {
-                        sb.AppendFormat("{0:x2}", chunkRow.Bytes[0]);
+                        var str = chunkRow.ChunkIndex.ToString().PadLeft(sampleLength, '_');
+                        sb.Append(str);
                     }
                     else
                     {
-                        sb.Append("  ");
+                        sb.Append(' ', sampleLength);
                     }
                 }
                 resultString.Add(sb.ToString());
