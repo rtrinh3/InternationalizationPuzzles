@@ -233,12 +233,11 @@ public class Puzzle16 : IPuzzle
 
     public string Solve()
     {
-        var timerThread = Task.Run(TimerCallback);
-        var drawThread = Task.Run(DrawCallback);
+        //var timerThread = Task.Run(TimerCallback);
+        //var drawThread = Task.Run(DrawCallback);
 
         Stack<Tuple<ImmutableDictionary<Coord, Tile>, Coord, int>> stack = new();
         stack.Push(Tuple.Create(initialTiles, new Coord(0, 0), 0));
-        int answer = initialTiles.Count * 4;
         while (stack.TryPop(out var state))
         {
             var (maze, position, rotations) = state;
@@ -248,8 +247,9 @@ public class Puzzle16 : IPuzzle
             }
             if (position.Row + position.Col > height + width)
             {
-                answer = Math.Min(answer, rotations);
-                continue;
+                solved = true;
+                drawQueue.Add(null);
+                return rotations.ToString();
             }
             // Walk the grid in diagonal order (see https://en.wikipedia.org/wiki/Pairing_function )
             Coord nextPos = position.Row == 0
@@ -275,7 +275,7 @@ public class Puzzle16 : IPuzzle
                 }
                 if (seenTiles.Contains(nextTile))
                 {
-                    continue;
+                    break;
                 }
                 seenTiles.Add(nextTile);
                 if (nextTile.Left != GetTile(maze, position.Next(Direction.Left)).Right)
@@ -294,9 +294,7 @@ public class Puzzle16 : IPuzzle
                 stack.Push(nextState);
             }
         }
-        solved = true;
-        drawQueue.Add(null);
-        return answer.ToString();
+        throw new Exception("No solution found");
     }
 
     private void TimerCallback()
