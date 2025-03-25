@@ -100,7 +100,7 @@ public class Puzzle16 : IPuzzle
             };
         }
 
-        public char Representation()
+        public char ToChar()
         {
             if (this == new Tile(1, 0, 1, 0))
                 return '│';
@@ -187,9 +187,9 @@ public class Puzzle16 : IPuzzle
         }
     }
 
-    // string input = File.ReadAllText(@"16-test-input.txt", CodePagesEncodingProvider.Instance.GetEncoding(437));
     public Puzzle16(string input)
     {
+        // string input = File.ReadAllText(@"16-test-input.txt", CodePagesEncodingProvider.Instance.GetEncoding(437));
         string[] lines = input.TrimEnd().ReplaceLineEndings("\n").Split('\n');
         this.height = lines.Length;
         var distinctWidths = lines.Select(x => x.Length).Distinct().ToArray();
@@ -240,32 +240,26 @@ public class Puzzle16 : IPuzzle
         stack.Push(Tuple.Create(initialTiles, new Coord(0, 0), 0));
         while (stack.TryPop(out var state))
         {
+            //Thread.Sleep(1);
             var (maze, position, rotations) = state;
             if (timerQueue.TryDequeue(out _))
             {
                 drawQueue.Add(state);
             }
-            if (position.Row + position.Col > height + width)
+            // Scan the grid, plus one extra row and column of empty space
+            if (position.Row == this.height && position.Col == this.width)
             {
                 solved = true;
                 drawQueue.Add(null);
                 return rotations.ToString();
             }
-            // Walk the grid in diagonal order (see https://en.wikipedia.org/wiki/Pairing_function )
-            Coord nextPos = position.Row == 0
-                ? new(position.Col + 1, 0)
-                : new(position.Row - 1, position.Col + 1);
+            // Walk the grid left-to-right, top-to-bottom
+            Coord nextPos = position.Col == this.width
+                ? new(position.Row + 1, 0)
+                : new(position.Row, position.Col + 1);
             Tile currentTile = GetTile(maze, position);
-            if (currentTile == Tile.Empty)
-            {
-                if (GetTile(maze, position.Next(Direction.Left)).Right == 0 && GetTile(maze, position.Next(Direction.Up)).Down == 0)
-                {
-                    stack.Push(Tuple.Create(maze, nextPos, rotations));
-                }
-                continue;
-            }
-            List<Tuple<ImmutableDictionary<Coord, Tile>, Coord, int>> nextStates = new();
-            List<Tile> seenTiles = new();
+            List<Tuple<ImmutableDictionary<Coord, Tile>, Coord, int>> nextStates = new(capacity: 4);
+            List<Tile> seenTiles = new(capacity: 4);
             for (int nextRotations = 0; nextRotations < 4; nextRotations++)
             {
                 Tile nextTile = currentTile;
@@ -323,7 +317,7 @@ public class Puzzle16 : IPuzzle
             {
                 for (int col = 0; col < this.width; col++)
                 {
-                    if (row + col < pos.Row + pos.Col || (row + col == pos.Row + pos.Col && col <= pos.Col))
+                    if (row < pos.Row || (row == pos.Row && col <= pos.Col))
                     {
                         Console.BackgroundColor = ConsoleColor.DarkRed;
                     }
@@ -333,7 +327,7 @@ public class Puzzle16 : IPuzzle
                     }
                     var coord = new Coord(row, col);
                     var tile = maze.GetValueOrDefault(coord);
-                    char tileRep = tile.Representation();
+                    char tileRep = tile.ToChar();
                     Console.Write(tileRep);
                 }
                 Console.BackgroundColor = ConsoleColor.Black;
