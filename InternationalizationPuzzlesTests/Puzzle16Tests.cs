@@ -18,7 +18,6 @@ public class Puzzle16Tests
     {
         var solver = new Puzzle16(File.ReadAllText("16-input-edit.txt"));
         var answer = solver.Solve();
-        //Assert.AreEqual("", answer);
-        Assert.Inconclusive(answer);
+        Assert.AreEqual("1180", answer);
     }
 }
