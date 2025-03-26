@@ -70,27 +70,35 @@ public class Puzzle19(string input) : IPuzzle
             return newZonePerRule.ToArray();
         }).ToArray();
         // Search
-        var stack = new Stack<(ImmutableHashSet<DateTime> Dates, ImmutableList<TimeZoneInfo> SelectedZones)>();
-        stack.Push(([], []));
+        var stack = new Stack<(ImmutableHashSet<DateTime> Dates, ImmutableList<TimeZoneInfo> SelectedZones, int Index)>();
+        stack.Push(([], [], 0));
+        //var answers = new Dictionary<string, int>();
+        string answer = "";
+        int maxZonesUsed = 0;
         while (stack.TryPop(out var state))
         {
-            var (dates, selectedZones) = state;
-            int currentZoneIndex = selectedZones.Count;
+            var (dates, selectedZones, currentZoneIndex) = state;
             if (currentZoneIndex >= timestampsByLocation.Count)
             {
-                if (dates.Count > 1)
+                if (dates.Count != 1)
                 {
-                    throw new Exception("Too many events?!");
+                    Console.WriteLine("Irregular solution");
                 }
-                if (dates.Count == 1)
+                else
                 {
-                    var answerDate = dates.Single();
-                    var answer = answerDate.ToString(@"yyyy-MM-ddTHH:mm:ss+00:00");
-                    return answer;
+                    var dateString = dates.Single().ToString(@"yyyy-MM-ddTHH:mm:ss+00:00");
+                    if (selectedZones.Count > maxZonesUsed)
+                    {
+                        answer = dateString;
+                        maxZonesUsed = selectedZones.Count;
+                    }
                 }
             }
             else
             {
+                // Try not using this zone
+                stack.Push((dates, selectedZones, currentZoneIndex + 1));
+                // Use this zone
                 var newTimestamps = timestampsByLocation[currentZoneIndex].Item2;
                 var zoneVariants = tzsByZone[currentZoneIndex];
                 foreach (var zone in zoneVariants)
@@ -102,11 +110,11 @@ public class Puzzle19(string input) : IPuzzle
                     if (newDates.Count > 0)
                     {
                         var newZones = selectedZones.Add(zone);
-                        stack.Push((newDates, newZones));
+                        stack.Push((newDates, newZones, currentZoneIndex + 1));
                     }
                 }
             }
         }
-        throw new Exception("No solution found");
+        return answer;
     }
 }
