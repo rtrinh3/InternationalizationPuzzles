@@ -45,6 +45,7 @@ Func<string, IPuzzle>[] puzzles =
     x => new Puzzle16(x),
     x => new Puzzle17(x),
     x => new Puzzle18(x),
+    x => new Puzzle19(x),
     // Add puzzles here
 ];
 if (!int.TryParse(day, out int dayValue) || dayValue < 1 || dayValue > puzzles.Length)
