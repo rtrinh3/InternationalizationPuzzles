@@ -14,6 +14,7 @@ def Solve(inputFileName: str):
     tzVersions = ['2018c', '2018g', '2021b', '2023d']
     for version in tzVersions:
         if not os.path.isdir(version):
+            print('Preparing tz {0}'.format(version))
             tzFileName = 'tzdata{0}.tar.gz'.format(version)
             tzUrl = 'https://data.iana.org/time-zones/releases/' + tzFileName
             urllib.request.urlretrieve(tzUrl, tzFileName)
