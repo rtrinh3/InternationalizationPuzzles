@@ -17,10 +17,6 @@ public class Puzzle19Tests
     {
         var solver = new Puzzle19(File.ReadAllText("19-input.txt"));
         var answer = solver.Solve();
-        //Assert.AreEqual("", answer);
-        Assert.AreNotEqual("2024-04-08T10:25:00+00:00", answer);
-        Assert.AreNotEqual("2024-04-13T05:28:00+00:00", answer);
-        Console.WriteLine(answer);
-        Assert.Inconclusive(answer);
+        Assert.AreEqual("2024-04-09T03:40:00+00:00", answer);
     }
 }
