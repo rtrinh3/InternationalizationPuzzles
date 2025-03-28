@@ -6,15 +6,15 @@
 public class Puzzle20Tests
 {
     [TestMethod()]
-    public void TestInputTest()
+    public void Decode_TestInputTest()
     {
         var solver = new Puzzle20(File.ReadAllText("20-test-input.txt"));
         var answer = solver.Decode();
-        Assert.IsTrue(answer.Contains("ꪪꪪꪪ This is a secret message. ꪪꪪꪪ Good luck decoding me! ꪪꪪꪪ"));
+        Assert.AreEqual("\uAAAA\uAAAA\uAAAA This is a secret message. \uAAAA\uAAAA\uAAAA Good luck decoding me! \uAAAA\uAAAA\uAAAA", answer);
     }
 
     [TestMethod()]
-    public void InputTest()
+    public void Solve_InputTest()
     {
         var solver = new Puzzle20(File.ReadAllText("20-input.txt"));
         var answer = solver.Solve();
