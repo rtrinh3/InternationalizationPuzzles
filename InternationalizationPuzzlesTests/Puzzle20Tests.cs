@@ -18,7 +18,6 @@ public class Puzzle20Tests
     {
         var solver = new Puzzle20(File.ReadAllText("20-input.txt"));
         var answer = solver.Solve();
-        //Assert.AreEqual("", answer);
-        Assert.Inconclusive(answer);
+        Assert.AreEqual("4216386", answer);
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace InternationalizationPuzzles.Tests;
 
 // https://i18n-puzzles.com/puzzle/19/
+// Puzzle 19: Out of date
 [TestClass()]
 public class Puzzle19Tests
 {
