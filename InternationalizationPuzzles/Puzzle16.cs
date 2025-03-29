@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Drawing;
+using System.Text;
 
 namespace InternationalizationPuzzles;
 
@@ -251,6 +253,7 @@ public class Puzzle16 : IPuzzle
             {
                 solved = true;
                 drawQueue.Add(null);
+                //drawThread.Wait();
                 return rotations.ToString();
             }
             // Walk the grid left-to-right, top-to-bottom
@@ -296,7 +299,7 @@ public class Puzzle16 : IPuzzle
         var timer = Stopwatch.StartNew();
         while (!solved)
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(250);
             Console.WriteLine($"Time: {timer.Elapsed}");
             timerQueue.Enqueue(true);
         }
@@ -313,27 +316,55 @@ public class Puzzle16 : IPuzzle
             }
             var (maze, pos, rot) = item;
             Console.WriteLine($"Rotations: {rot}");
-            for (int row = 0; row < this.height; row++)
+            for (int row = 0; row < pos.Row; row++)
             {
-                for (int col = 0; col < this.width; col++)
+                var rowBuilder = new StringBuilder();
+                for (int col = 0; col <= this.width; col++)
                 {
-                    if (row < pos.Row || (row == pos.Row && col <= pos.Col))
-                    {
-                        Console.BackgroundColor = ConsoleColor.DarkRed;
-                    }
-                    else
-                    {
-                        Console.BackgroundColor = ConsoleColor.Black;
-                    }
                     var coord = new Coord(row, col);
                     var tile = maze.GetValueOrDefault(coord);
-                    char tileRep = tile.ToChar();
-                    Console.Write(tileRep);
+                    rowBuilder.Append(tile.ToChar());
                 }
-                Console.BackgroundColor = ConsoleColor.Black;
+                Console.BackgroundColor = ConsoleColor.DarkBlue;
+                Console.Write(rowBuilder.ToString());
+                Console.ResetColor();
                 Console.WriteLine();
             }
+
+            var beforePosBuilder = new StringBuilder();
+            for (int col = 0; col < pos.Col; col++)
+            {
+                var coord = new Coord(pos.Row, col);
+                var tile = maze.GetValueOrDefault(coord);
+                beforePosBuilder.Append(tile.ToChar());
+            }
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Write(beforePosBuilder.ToString());
+
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write(maze.GetValueOrDefault(pos).ToChar());
+
             Console.ResetColor();
+            var afterPosBuilder = new StringBuilder();
+            for (int col = pos.Col + 1; col <= this.width; col++)
+            {
+                var coord = new Coord(pos.Row, col);
+                var tile = maze.GetValueOrDefault(coord);
+                afterPosBuilder.Append(tile.ToChar());
+            }
+            afterPosBuilder.AppendLine();
+            for (int row = pos.Row + 1; row <= this.height; row++)
+            {
+                var rowBuilder = new StringBuilder();
+                for (int col = 0; col <= this.width; col++)
+                {
+                    var coord = new Coord(row, col);
+                    var tile = maze.GetValueOrDefault(coord);
+                    afterPosBuilder.Append(tile.ToChar());
+                }
+                afterPosBuilder.AppendLine();
+            }
+            Console.WriteLine(afterPosBuilder.ToString());
         }
     }
 }

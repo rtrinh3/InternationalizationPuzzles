@@ -102,6 +102,7 @@ public class Puzzle17 : IPuzzle
             {
                 drawQueue.Add(currentMap);
             }
+            //Thread.Sleep(1);
             int maxCol = currentMap.Keys.Max(coord => coord.Col);
             if (maxCol >= columns)
             {
@@ -283,12 +284,12 @@ public class Puzzle17 : IPuzzle
                 {
                     if (item.TryGetValue(new Coord(row, column), out var chunkRow))
                     {
-                        var str = chunkRow.ChunkIndex.ToString().PadLeft(sampleLength, '_');
+                        var str = " " + chunkRow.ChunkIndex.ToString().PadLeft(sampleLength, '_');
                         sb.Append(str);
                     }
                     else
                     {
-                        sb.Append(' ', sampleLength);
+                        sb.Append(' ', sampleLength + 1);
                     }
                 }
                 resultString.Add(sb.ToString());
