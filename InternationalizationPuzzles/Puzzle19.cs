@@ -25,6 +25,8 @@ public class Puzzle19(string input) : IPuzzle
         // Shift
         // shifted[place][version] = [list of datetime strings]
         var shifted = new Dictionary<string, Dictionary<string, List<string>>>();
+        // Credit to https://codeblog.jonskeet.uk/2019/06/30/versioning-limitations-in-net/
+        // for showing how to work with multiple versions of a library
         (string, string)[] nodaTimeVersions =
         [
             ("2018c", "2.2.4"),
