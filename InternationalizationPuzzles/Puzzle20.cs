@@ -56,7 +56,7 @@ public class Puzzle20(string input) : IPuzzle
         });
     }
 
-    private static IEnumerable<uint> ParseExtendedUtf8(IEnumerable<byte> bytes)
+    public static IEnumerable<uint> ParseExtendedUtf8(IEnumerable<byte> bytes)
     {
         int continuationBytesExpected = 0;
         uint codeBuffer = 0;
